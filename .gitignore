@@ -38,3 +38,6 @@ out/
 
 # Database & Secrets
 *.yml
+
+# 예외
+!.github/workflows/*.yml
