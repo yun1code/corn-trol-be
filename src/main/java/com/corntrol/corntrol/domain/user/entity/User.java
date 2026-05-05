@@ -29,4 +29,9 @@ public class User {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    public void updateProfile(String nickname, String profileImage) {
+        this.nickname = nickname;
+        this.profileImage = profileImage;
+    }
 }

@@ -37,4 +37,4 @@ out/
 .vscode/
 
 # Database & Secrets
-application.yml
+*.yml
