@@ -41,3 +41,4 @@ out/
 
 # 예외
 !.github/workflows/*.yml
+!src/main/resources/application-prod.yml
