@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/corntrol
+    url: jdbc:mysql://172.17.0.1:3306/corntrol
     username: corntrol
     password: ${DB_PASSWORD}
 
