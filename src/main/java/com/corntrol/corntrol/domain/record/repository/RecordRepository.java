@@ -1,9 +1,12 @@
 package com.corntrol.corntrol.domain.record.repository;
 
 import com.corntrol.corntrol.domain.record.entity.Record;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface RecordRepository extends JpaRepository<Record, Long> {
@@ -13,4 +16,10 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
             "JOIN RecordLink rl ON r.id = rl.targetRecordId " +
             "WHERE rl.sourceRecordId = :recordId AND rl.isConnected = true")
     List<Record> findAllConnectedRecords(@Param("recordId") Long recordId);
+
+    Page<Record> findAllByUser_Id(Long userId, Pageable pageable);
+
+    @Query("SELECT r FROM Record r WHERE r.user.id = :userId AND " +
+            "(r.content LIKE %:keyword% OR r.mainTopic LIKE %:keyword% OR r.keywords LIKE %:keyword%)")
+    Page<Record> searchRecords(@Param("userId") Long userId, @Param("keyword") String keyword, Pageable pageable);
 }
