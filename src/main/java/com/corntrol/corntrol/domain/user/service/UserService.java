@@ -5,6 +5,8 @@ import com.corntrol.corntrol.domain.user.entity.User;
 import com.corntrol.corntrol.domain.user.repository.UserRepository;
 import com.corntrol.corntrol.global.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -83,9 +85,20 @@ public class UserService {
     // 사용자 조회
     @Transactional(readOnly = true)
     public UserResponse getUser(Long userId) {
-
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("유저 없음"));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || authentication.getName() == null) {
+            throw new RuntimeException("인증 정보가 존재하지 않습니다.");
+        }
+
+        String currentEmail = authentication.getName();
+
+        if (!user.getEmail().equals(currentEmail)) {
+            throw new RuntimeException("접근 권한이 없습니다.");
+        }
 
         return UserResponse.builder()
                 .userId(user.getId())
