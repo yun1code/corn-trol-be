@@ -110,9 +110,18 @@ public class UserService {
     // 프로필 수정
     @Transactional
     public UserResponse updateProfile(Long userId, UpdateProfileRequest request) {
-
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("유저 없음"));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getName() == null) {
+            throw new RuntimeException("인증 정보가 존재하지 않습니다.");
+        }
+
+        String currentEmail = authentication.getName();
+        if (!user.getEmail().equals(currentEmail)) {
+            throw new RuntimeException("접근 권한이 없습니다.");
+        }
 
         user.updateProfile(request.getNickname(), request.getProfileImage());
 
@@ -120,6 +129,51 @@ public class UserService {
                 .userId(user.getId())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
+                .build();
+    }
+
+    // 프로필 조회
+    @Transactional(readOnly = true)
+    public UserProfileResponse getUserProfile(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("유저 없음"));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getName() == null) {
+            throw new RuntimeException("인증 정보가 존재하지 않습니다.");
+        }
+
+        String currentEmail = authentication.getName();
+        if (!user.getEmail().equals(currentEmail)) {
+            throw new RuntimeException("접근 권한이 없습니다.");
+        }
+
+        return UserProfileResponse.builder()
+                .nickname(user.getNickname())
+                .profileImage(user.getProfileImage())
+                .build();
+    }
+
+    // 사용자 통계 조회
+    @Transactional(readOnly = true)
+    public UserStatsResponse getUserStats(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("유저 없음"));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getName() == null) {
+            throw new RuntimeException("인증 정보가 존재하지 않습니다.");
+        }
+
+        String currentEmail = authentication.getName();
+        if (!user.getEmail().equals(currentEmail)) {
+            throw new RuntimeException("접근 권한이 없습니다.");
+        }
+
+        return UserStatsResponse.builder()
+                .totalFocusTime(150L)
+                .totalRecords(24L)
+                .totalConnections(12L)
                 .build();
     }
 }
