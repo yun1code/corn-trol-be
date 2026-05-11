@@ -22,6 +22,8 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    private String refreshToken;
+
     @Column(nullable = false)
     private String nickname;
 
@@ -33,5 +35,10 @@ public class User {
     public void updateProfile(String nickname, String profileImage) {
         this.nickname = nickname;
         this.profileImage = profileImage;
+    }
+
+    // 리프레시 토큰 업데이트
+    public void updateRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 }

@@ -1,17 +1,17 @@
 package com.corntrol.corntrol.domain.user.controller;
 
-import com.corntrol.corntrol.domain.user.dto.LoginRequest;
-import com.corntrol.corntrol.domain.user.dto.LoginResponse;
-import com.corntrol.corntrol.domain.user.dto.SignupRequest;
-import com.corntrol.corntrol.domain.user.dto.UserResponse;
+import com.corntrol.corntrol.domain.user.dto.*;
 import com.corntrol.corntrol.domain.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Collections;
 
 @Tag(name = "인증 API", description = "회원가입 및 로그인을 담당합니다.")
 @RestController
@@ -31,5 +31,12 @@ public class AuthController {
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest request) {
         return userService.login(request);
+    }
+
+    @Operation(summary = "토큰 재발급", description = "리프레시 토큰으로 새로운 액세스 토큰을 발급합니다.")
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(@RequestBody TokenRefreshRequest request) {
+        String newAccessToken = userService.refreshAccessToken(request.getRefreshToken());
+        return ResponseEntity.ok(Collections.singletonMap("accessToken", newAccessToken));
     }
 }
