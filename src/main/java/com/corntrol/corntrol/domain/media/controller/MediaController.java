@@ -37,4 +37,16 @@ public class MediaController {
                 savedMedia.getTranscribedText()
         ));
     }
+
+    @Operation(summary = "미디어 정보 조회", description = "미디어 ID를 통해 저장된 S3 URL과 STT 텍스트를 조회합니다.")
+    @GetMapping("/{id}")
+    public ResponseEntity<MediaUploadResponse> getMedia(@PathVariable("id") Long id) {
+        Media media = mediaService.getMedia(id);
+
+        return ResponseEntity.ok(new MediaUploadResponse(
+                media.getId(),
+                media.getFileUrl(),
+                media.getTranscribedText()
+        ));
+    }
 }

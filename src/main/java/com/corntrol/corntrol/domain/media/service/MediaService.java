@@ -21,4 +21,10 @@ public class MediaService {
 
         return mediaRepository.save(media);
     }
+
+    @Transactional(readOnly = true)
+    public Media getMedia(Long id) {
+        return mediaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("해당 미디어를 찾을 수 없습니다."));
+    }
 }
