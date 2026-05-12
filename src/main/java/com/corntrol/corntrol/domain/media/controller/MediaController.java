@@ -1,6 +1,10 @@
 package com.corntrol.corntrol.domain.media.controller;
 
+import com.corntrol.corntrol.domain.media.dto.MediaUploadResponse;
+import com.corntrol.corntrol.domain.media.entity.Media;
+import com.corntrol.corntrol.domain.media.service.MediaService;
 import com.corntrol.corntrol.domain.media.service.S3Service;
+import com.corntrol.corntrol.domain.media.service.WhisperService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -16,14 +20,21 @@ import org.springframework.web.multipart.MultipartFile;
 public class MediaController {
 
     private final S3Service s3Service;
+    private final WhisperService whisperService;
+    private final MediaService mediaService;
 
-    /**
-     * 클라이언트로부터 전달받은 파일을 S3에 업로드하고 접근 가능한 URL을 반환
-     */
-    @Operation(summary = "파일 업로드", description = "MultipartFile을 전달받아 S3 버킷에 저장합니다.")
+    @Operation(summary = "파일 업로드 및 STT 변환", description = "MultipartFile을 S3에 저장하고 음성을 텍스트로 변환하여 데이터베이스에 저장합니다.")
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadFile(@RequestPart("file") MultipartFile file) {
+    public ResponseEntity<MediaUploadResponse> uploadMedia(@RequestPart("file") MultipartFile file) {
         String fileUrl = s3Service.uploadFile(file);
-        return ResponseEntity.ok(fileUrl);
+        String text = whisperService.transcribeAudio(file);
+
+        Media savedMedia = mediaService.saveMedia(fileUrl, text);
+
+        return ResponseEntity.ok(new MediaUploadResponse(
+                savedMedia.getId(),
+                savedMedia.getFileUrl(),
+                savedMedia.getTranscribedText()
+        ));
     }
 }
