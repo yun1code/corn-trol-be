@@ -47,16 +47,24 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # 기존 컨테이너 중지 및 삭제 (있으면)
+            # 기존 컨테이너 중지 및 삭제 (실패해도 계속 진행)
             sudo docker stop corntrol-container || true
             sudo docker rm corntrol-container || true
+            
+            # 안 쓰는 옛날 이미지 정리 (디스크 용량 확보)
+            sudo docker image prune -f
             
             # 새 이미지 pull
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/corntrol:latest
             
-            # 컨테이너 실행 (비밀번호 안전하게 주입)
+            # 컨테이너 실행
             sudo docker run -d \
               --name corntrol-container \
-              -p 8080:8080 \
+              --network host \
               -e DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+              -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+              -e AWS_ACCESS_KEY="${{ secrets.AWS_ACCESS_KEY }}" \
+              -e AWS_SECRET_KEY="${{ secrets.AWS_SECRET_KEY }}" \
+              -e AWS_S3_BUCKET="${{ secrets.AWS_S3_BUCKET }}" \
+              -e HUGGINGFACE_API_KEY="${{ secrets.HUGGINGFACE_API_KEY }}" \
               ${{ secrets.DOCKER_USERNAME }}/corntrol:latest
