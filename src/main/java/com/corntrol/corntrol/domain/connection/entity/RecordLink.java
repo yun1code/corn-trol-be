@@ -35,4 +35,8 @@ public class RecordLink {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    public void setConnected(boolean connected) {
+        this.isConnected = connected;
+    }
 }
