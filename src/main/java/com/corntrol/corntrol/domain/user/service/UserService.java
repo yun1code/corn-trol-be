@@ -93,22 +93,12 @@ public class UserService {
         return jwtUtil.createAccessToken(email);
     }
 
+    // 내 정보 조회
     @Transactional(readOnly = true)
-    public UserResponse getUser(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("유저 없음"));
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || authentication.getName() == null) {
-            throw new RuntimeException("인증 정보가 존재하지 않습니다.");
-        }
-
-        String currentEmail = authentication.getName();
-
-        if (!user.getEmail().equals(currentEmail)) {
-            throw new RuntimeException("접근 권한이 없습니다.");
-        }
+    public UserResponse getMyInfo() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         return UserResponse.builder()
                 .userId(user.getId())
@@ -117,20 +107,12 @@ public class UserService {
                 .build();
     }
 
+    // 내 프로필 수정
     @Transactional
-    public UserResponse updateProfile(Long userId, UpdateProfileRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("유저 없음"));
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || authentication.getName() == null) {
-            throw new RuntimeException("인증 정보가 존재하지 않습니다.");
-        }
-
-        String currentEmail = authentication.getName();
-        if (!user.getEmail().equals(currentEmail)) {
-            throw new RuntimeException("접근 권한이 없습니다.");
-        }
+    public UserResponse updateMyProfile(UpdateProfileRequest request) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         user.updateProfile(request.getNickname(), request.getProfileImage());
 
@@ -141,20 +123,12 @@ public class UserService {
                 .build();
     }
 
+    // 내 프로필 조회
     @Transactional(readOnly = true)
-    public UserProfileResponse getUserProfile(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("유저 없음"));
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || authentication.getName() == null) {
-            throw new RuntimeException("인증 정보가 존재하지 않습니다.");
-        }
-
-        String currentEmail = authentication.getName();
-        if (!user.getEmail().equals(currentEmail)) {
-            throw new RuntimeException("접근 권한이 없습니다.");
-        }
+    public UserProfileResponse getMyProfile() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
         return UserProfileResponse.builder()
                 .nickname(user.getNickname())
@@ -162,25 +136,31 @@ public class UserService {
                 .build();
     }
 
+    // 내 통계 조회
     @Transactional(readOnly = true)
-    public UserStatsResponse getUserStats(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("유저 없음"));
+    public UserStatsResponse getMyStats() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || authentication.getName() == null) {
-            throw new RuntimeException("인증 정보가 존재하지 않습니다.");
+        Long userId = user.getId();
+
+        // 총 몰입 시간
+        Long totalFocusTime = focusSessionRepository.sumFocusTimeByUserId(userId);
+        if (totalFocusTime == null) {
+            totalFocusTime = 0L; // 몰입 기록이 없으면 0으로 처리
         }
 
-        String currentEmail = authentication.getName();
-        if (!user.getEmail().equals(currentEmail)) {
-            throw new RuntimeException("접근 권한이 없습니다.");
-        }
+        // 총 기록 개수
+        Long totalRecords = (long) user.getRecords().size();
+
+        // 총 연결 노드 개수
+        Long totalConnections = recordLinkRepository.countByUserId(userId);
 
         return UserStatsResponse.builder()
-                .totalFocusTime(150L)
-                .totalRecords(24L)
-                .totalConnections(12L)
+                .totalFocusTime(totalFocusTime)
+                .totalRecords(totalRecords)
+                .totalConnections(totalConnections)
                 .build();
     }
 

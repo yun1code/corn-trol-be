@@ -19,30 +19,27 @@ public class UserController {
 
     private final UserService userService;
 
-    @Operation(summary = "사용자 조회", description = "특정 사용자의 상세 정보를 가져옵니다.")
-    @GetMapping("/{userId}")
-    public UserResponse getUser(@PathVariable Long userId) {
-        return userService.getUser(userId);
+    @Operation(summary = "내 정보 조회", description = "현재 로그인한 사용자의 상세 정보를 가져옵니다.")
+    @GetMapping("/me")
+    public UserResponse getMyInfo() {
+        return userService.getMyInfo();
     }
 
-    @Operation(summary = "프로필 수정", description = "사용자의 닉네임이나 프로필 정보를 업데이트합니다.")
-    @PutMapping("/{userId}")
-    public UserResponse updateProfile(
-            @PathVariable Long userId,
-            @RequestBody UpdateProfileRequest request) {
-
-        return userService.updateProfile(userId, request);
+    @Operation(summary = "내 프로필 수정", description = "현재 로그인한 사용자의 닉네임이나 프로필 정보를 업데이트합니다.")
+    @PutMapping("/me")
+    public UserResponse updateMyProfile(@RequestBody UpdateProfileRequest request) {
+        return userService.updateMyProfile(request);
     }
 
-    @Operation(summary = "프로필 조회", description = "특정 사용자의 닉네임과 프로필 이미지를 조회합니다.")
-    @GetMapping("/{userId}/profile")
-    public ResponseEntity<UserProfileResponse> getUserProfile(@PathVariable Long userId) {
-        return ResponseEntity.ok(userService.getUserProfile(userId));
+    @Operation(summary = "내 프로필 조회", description = "현재 로그인한 사용자의 닉네임과 프로필 이미지를 조회합니다.")
+    @GetMapping("/me/profile")
+    public ResponseEntity<UserProfileResponse> getMyProfile() {
+        return ResponseEntity.ok(userService.getMyProfile());
     }
 
-    @Operation(summary = "사용자 통계 조회", description = "특정 사용자의 전체 몰입 시간, 기록 개수, 연결 노드 개수 통계를 조회합니다. (현재 더미 데이터 반환)")
-    @GetMapping("/{userId}/stats")
-    public ResponseEntity<UserStatsResponse> getUserStats(@PathVariable Long userId) {
-        return ResponseEntity.ok(userService.getUserStats(userId));
+    @Operation(summary = "내 통계 조회", description = "현재 로그인한 사용자의 전체 몰입 시간, 기록 개수, 연결 노드 개수 통계를 조회합니다.")
+    @GetMapping("/me/stats")
+    public ResponseEntity<UserStatsResponse> getMyStats() {
+        return ResponseEntity.ok(userService.getMyStats());
     }
 }
