@@ -13,6 +13,7 @@ import com.corntrol.corntrol.global.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,7 @@ public class UserService {
     private final CoolingQuestionRepository coolingQuestionRepository;
     private final RecordLinkRepository recordLinkRepository;
     private final AnalysisRepository analysisRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public UserResponse signup(SignupRequest request) {
@@ -38,7 +40,7 @@ public class UserService {
 
         User user = User.builder()
                 .email(request.getEmail())
-                .password(request.getPassword())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .nickname(request.getNickname())
                 .build();
 
@@ -57,7 +59,7 @@ public class UserService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("유저 없음"));
 
-        if (!user.getPassword().equals(request.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new RuntimeException("비밀번호 틀림");
         }
 
@@ -208,5 +210,19 @@ public class UserService {
         analysisRepository.deleteByUserId(String.valueOf(userId));
 
         userRepository.delete(user);
+    }
+
+    // 비밀번호 변경
+    @Transactional
+    public void updatePassword(UpdatePasswordRequest request) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("기존 비밀번호가 일치하지 않습니다.");
+        }
+
+        user.updatePassword(passwordEncoder.encode(request.getNewPassword()));
     }
 }
