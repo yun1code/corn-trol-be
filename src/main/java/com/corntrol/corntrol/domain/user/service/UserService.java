@@ -57,10 +57,10 @@ public class UserService {
     public LoginResponse login(LoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("유저 없음"));
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 회원입니다."));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("비밀번호 틀림");
+            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
         }
 
         String accessToken = jwtUtil.createAccessToken(user.getEmail());
