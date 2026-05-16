@@ -70,4 +70,11 @@ public class AuthController {
         userService.withdraw();
         return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
     }
+
+    @Operation(summary = "비밀번호 변경", description = "로그인한 사용자의 비밀번호를 변경합니다.")
+    @PutMapping("/password")
+    public ResponseEntity<String> updatePassword(@RequestBody UpdatePasswordRequest request) {
+        userService.updatePassword(request);
+        return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+    }
 }
