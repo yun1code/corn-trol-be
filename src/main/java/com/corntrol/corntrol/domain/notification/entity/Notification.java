@@ -26,4 +26,9 @@ public class Notification {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    // 알림 읽음 처리 메서드
+    public void markAsRead() {
+        this.isRead = true;
+    }
 }
