@@ -12,6 +12,18 @@ spring:
       max-file-size: 50MB    # 파일 1개당 최대 크기
       max-request-size: 50MB # 1번 요청당 최대 크기
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 jwt:
   secret: ${JWT_SECRET:corntrol-local-dev-secret-key-must-be-at-least-32-bytes-long}
   access-token-validity-in-ms: 1800000
