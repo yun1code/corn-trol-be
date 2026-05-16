@@ -7,4 +7,6 @@ import java.util.Optional;
 public interface AnalysisRepository extends JpaRepository<Analysis, Long> {
 
     Optional<Analysis> findTopByRecordIdOrderByIdDesc(Long recordId);
+
+    void deleteByUserId(String userId);
 }

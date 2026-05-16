@@ -3,6 +3,12 @@ package com.corntrol.corntrol.domain.user.service;
 import com.corntrol.corntrol.domain.user.dto.*;
 import com.corntrol.corntrol.domain.user.entity.User;
 import com.corntrol.corntrol.domain.user.repository.UserRepository;
+import com.corntrol.corntrol.domain.report.repository.ReportRepository;
+import com.corntrol.corntrol.domain.notification.repository.NotificationRepository;
+import com.corntrol.corntrol.domain.focus.repository.FocusSessionRepository;
+import com.corntrol.corntrol.domain.focus.repository.CoolingQuestionRepository;
+import com.corntrol.corntrol.domain.connection.repository.RecordLinkRepository;
+import com.corntrol.corntrol.domain.analysis.repository.AnalysisRepository;
 import com.corntrol.corntrol.global.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -16,8 +22,13 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
+    private final ReportRepository reportRepository;
+    private final NotificationRepository notificationRepository;
+    private final FocusSessionRepository focusSessionRepository;
+    private final CoolingQuestionRepository coolingQuestionRepository;
+    private final RecordLinkRepository recordLinkRepository;
+    private final AnalysisRepository analysisRepository;
 
-    // 회원가입
     @Transactional
     public UserResponse signup(SignupRequest request) {
 
@@ -27,7 +38,7 @@ public class UserService {
 
         User user = User.builder()
                 .email(request.getEmail())
-                .password(request.getPassword()) // 🔥 나중에 암호화
+                .password(request.getPassword())
                 .nickname(request.getNickname())
                 .build();
 
@@ -40,7 +51,6 @@ public class UserService {
                 .build();
     }
 
-    // 로그인
     @Transactional
     public LoginResponse login(LoginRequest request) {
 
@@ -64,7 +74,6 @@ public class UserService {
                 .build();
     }
 
-    // 토큰 재발급
     @Transactional(readOnly = true)
     public String refreshAccessToken(String refreshToken) {
         if (!jwtUtil.validateToken(refreshToken)) {
@@ -82,7 +91,6 @@ public class UserService {
         return jwtUtil.createAccessToken(email);
     }
 
-    // 사용자 조회
     @Transactional(readOnly = true)
     public UserResponse getUser(Long userId) {
         User user = userRepository.findById(userId)
@@ -107,7 +115,6 @@ public class UserService {
                 .build();
     }
 
-    // 프로필 수정
     @Transactional
     public UserResponse updateProfile(Long userId, UpdateProfileRequest request) {
         User user = userRepository.findById(userId)
@@ -132,7 +139,6 @@ public class UserService {
                 .build();
     }
 
-    // 프로필 조회
     @Transactional(readOnly = true)
     public UserProfileResponse getUserProfile(Long userId) {
         User user = userRepository.findById(userId)
@@ -154,7 +160,6 @@ public class UserService {
                 .build();
     }
 
-    // 사용자 통계 조회
     @Transactional(readOnly = true)
     public UserStatsResponse getUserStats(Long userId) {
         User user = userRepository.findById(userId)
@@ -175,5 +180,33 @@ public class UserService {
                 .totalRecords(24L)
                 .totalConnections(12L)
                 .build();
+    }
+
+    // 로그아웃
+    @Transactional
+    public void logout() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+        user.updateRefreshToken(null);
+    }
+
+    // 회원 탈퇴
+    @Transactional
+    public void withdraw() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+        Long userId = user.getId();
+
+        reportRepository.deleteByUserId(userId);
+        notificationRepository.deleteByUserId(userId);
+        focusSessionRepository.deleteByUserId(userId);
+        coolingQuestionRepository.deleteByUserId(userId);
+        recordLinkRepository.deleteByUserId(userId);
+        analysisRepository.deleteByUserId(String.valueOf(userId));
+
+        userRepository.delete(user);
     }
 }
