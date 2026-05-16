@@ -19,6 +19,10 @@ public class Report {
     private Long userId;
 
     private Double focusTimeTotal; // 총 몰입 시간
+
+    private Double shortFormTimeTotal; // 숏폼 소비 시간
+    private Double recoveryRate; // 알곡 회복률 (%)
+
     private Integer connectionDensity; // 연결 밀도
 
     @Column(columnDefinition = "TEXT")
