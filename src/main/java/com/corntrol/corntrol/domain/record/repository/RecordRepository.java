@@ -22,4 +22,7 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
     @Query("SELECT r FROM Record r WHERE r.user.id = :userId AND " +
             "(r.content LIKE %:keyword% OR r.mainTopic LIKE %:keyword% OR r.keywords LIKE %:keyword%)")
     Page<Record> searchRecords(@Param("userId") Long userId, @Param("keyword") String keyword, Pageable pageable);
+
+    // 유저 ID로 관련된 모든 기록 삭제
+    void deleteAllByUserId(Long userId);
 }

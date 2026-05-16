@@ -18,4 +18,6 @@ public interface RecordLinkRepository extends JpaRepository<RecordLink, Long> {
 
     @Query("SELECT r FROM RecordLink r WHERE (r.sourceRecordId = :recordId OR r.targetRecordId = :recordId) AND r.isConnected = true")
     List<RecordLink> findAllConnectedByRecordId(@Param("recordId") Long recordId);
+
+    void deleteByUserId(Long userId);
 }

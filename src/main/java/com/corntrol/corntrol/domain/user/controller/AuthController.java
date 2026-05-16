@@ -8,10 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 
@@ -58,5 +55,19 @@ public class AuthController {
     public ResponseEntity<String> verifyEmail(@Valid @RequestBody EmailVerifyRequest request) {
         emailAuthService.verifyCode(request.getEmail(), request.getCode());
         return ResponseEntity.ok("이메일 인증에 성공했습니다.");
+    }
+
+    @Operation(summary = "로그아웃", description = "사용자의 로그아웃 요청을 처리하고 리프레시 토큰을 무효화합니다.")
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout() {
+        userService.logout();
+        return ResponseEntity.ok("로그아웃되었습니다.");
+    }
+
+    @Operation(summary = "회원 탈퇴", description = "회원 정보를 삭제하고 탈퇴 처리합니다.")
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<String> withdraw() {
+        userService.withdraw();
+        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
     }
 }
