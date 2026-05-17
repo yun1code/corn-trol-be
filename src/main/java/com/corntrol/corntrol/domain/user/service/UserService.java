@@ -11,7 +11,6 @@ import com.corntrol.corntrol.domain.connection.repository.RecordLinkRepository;
 import com.corntrol.corntrol.domain.analysis.repository.AnalysisRepository;
 import com.corntrol.corntrol.global.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -104,6 +103,7 @@ public class UserService {
                 .userId(user.getId())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
+                .profileImage(user.getProfileImage() != null ? user.getProfileImage().name() : null)
                 .build();
     }
 
@@ -120,6 +120,7 @@ public class UserService {
                 .userId(user.getId())
                 .email(user.getEmail())
                 .nickname(user.getNickname())
+                .profileImage(user.getProfileImage() != null ? user.getProfileImage().name() : null)
                 .build();
     }
 
@@ -132,7 +133,7 @@ public class UserService {
 
         return UserProfileResponse.builder()
                 .nickname(user.getNickname())
-                .profileImage(user.getProfileImage())
+                .profileImage(user.getProfileImage() != null ? user.getProfileImage().name() : null)
                 .build();
     }
 
@@ -145,22 +146,21 @@ public class UserService {
 
         Long userId = user.getId();
 
-        // 총 몰입 시간
         Long totalFocusTime = focusSessionRepository.sumFocusTimeByUserId(userId);
         if (totalFocusTime == null) {
-            totalFocusTime = 0L; // 몰입 기록이 없으면 0으로 처리
+            totalFocusTime = 0L;
         }
 
-        // 총 기록 개수
         Long totalRecords = (long) user.getRecords().size();
-
-        // 총 연결 노드 개수
         Long totalConnections = recordLinkRepository.countByUserId(userId);
+
+        Long totalFocusCount = focusSessionRepository.countByUserId(userId);
 
         return UserStatsResponse.builder()
                 .totalFocusTime(totalFocusTime)
                 .totalRecords(totalRecords)
                 .totalConnections(totalConnections)
+                .totalFocusCount(totalFocusCount)
                 .build();
     }
 
