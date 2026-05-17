@@ -60,7 +60,9 @@ public class FocusService {
         if (response != null && response.getQuestions() != null) {
             List<CoolingQuestion> questions = response.getQuestions().stream()
                     .map(q -> CoolingQuestion.builder()
-                            .recordId(q.getRecordId())
+                            .recordId(recordId)
+                            .userId(userId)
+                            .topic(topic)
                             .questionText(q.getQuestionText())
                             .build())
                     .toList();
@@ -88,6 +90,7 @@ public class FocusService {
                 .userId(userId)
                 .recordId(recordId)
                 .duration(duration)
+                .startTime(java.time.LocalDateTime.now())
                 .build();
 
         FocusSession savedSession = focusSessionRepository.save(session);
@@ -100,6 +103,6 @@ public class FocusService {
         FocusSession session = focusSessionRepository.findById(sessionId)
                 .orElseThrow(() -> new EntityNotFoundException("진행 중인 집중 세션을 찾을 수 없습니다."));
 
-        // session.updateEndTime(LocalDateTime.now());
+        session.endSession();
     }
 }

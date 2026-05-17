@@ -23,4 +23,9 @@ public class FocusSession {
 
     @Builder.Default
     private boolean isCompleted = false;
+
+    public void endSession() {
+        this.endTime = java.time.LocalDateTime.now();
+        this.isCompleted = true;
+    }
 }
