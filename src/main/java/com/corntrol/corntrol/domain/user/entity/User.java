@@ -30,7 +30,9 @@ public class User {
     @Column(nullable = false)
     private String nickname;
 
-    private String profileImage;
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    private ProfileImage profileImage = ProfileImage.SPROUT;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -40,8 +42,12 @@ public class User {
     private List<Record> records = new ArrayList<>();
 
     public void updateProfile(String nickname, String profileImage) {
-        this.nickname = nickname;
-        this.profileImage = profileImage;
+        if (nickname != null && !nickname.isBlank()) {
+            this.nickname = nickname;
+        }
+        if (profileImage != null && !profileImage.isBlank()) {
+            this.profileImage = ProfileImage.valueOf(profileImage);
+        }
     }
 
     public void updateRefreshToken(String refreshToken) {

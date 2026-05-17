@@ -9,4 +9,5 @@ public class UserStatsResponse {
     private Long totalFocusTime;
     private Long totalRecords;
     private Long totalConnections;
+    private Long totalFocusCount;
 }
