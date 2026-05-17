@@ -27,4 +27,6 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
     void deleteAllByUserId(Long userId);
 
     List<Record> findByUser_Id(Long userId);
+
+    Page<Record> findAllByUser_IdAndCreatedAtBetween(Long userId, java.time.LocalDateTime start, java.time.LocalDateTime end, Pageable pageable);
 }

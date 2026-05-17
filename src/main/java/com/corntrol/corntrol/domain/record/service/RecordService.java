@@ -42,8 +42,16 @@ public class RecordService {
         return recordRepository.save(record).getId();
     }
 
-    public Page<RecordDto.Response> getRecords(Long userId, Pageable pageable) {
-        return recordRepository.findAllByUser_Id(userId, pageable)
+    public Page<RecordDto.Response> getRecords(Long userId, java.time.LocalDate date, Pageable pageable) {
+        if (date == null) {
+            return recordRepository.findAllByUser_Id(userId, pageable)
+                    .map(RecordDto.Response::from);
+        }
+
+        java.time.LocalDateTime start = date.atStartOfDay();
+        java.time.LocalDateTime end = date.atTime(23, 59, 59, 999999999);
+
+        return recordRepository.findAllByUser_IdAndCreatedAtBetween(userId, start, end, pageable)
                 .map(RecordDto.Response::from);
     }
 
