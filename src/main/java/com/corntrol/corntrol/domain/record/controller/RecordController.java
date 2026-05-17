@@ -8,8 +8,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDate;
 
 @Tag(name = "기록", description = "알곡(기록) CRUD 및 검색 API")
 @RestController
@@ -25,12 +27,13 @@ public class RecordController {
         return ResponseEntity.ok(recordService.createRecord(request));
     }
 
-    @Operation(summary = "기록 목록 조회", description = "특정 사용자의 기록을 페이징하여 조회합니다.")
+    @Operation(summary = "기록 목록 조회", description = "특정 사용자의 기록을 페이징하여 조회합니다. date 파라미터 전송 시 해당 날짜의 기록만 필터링합니다.")
     @GetMapping
     public ResponseEntity<Page<RecordDto.Response>> getRecords(
             @RequestParam("userId") Long userId,
+            @RequestParam(value = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             Pageable pageable) {
-        return ResponseEntity.ok(recordService.getRecords(userId, pageable));
+        return ResponseEntity.ok(recordService.getRecords(userId, date, pageable));
     }
 
     @Operation(summary = "기록 상세 조회", description = "특정 기록의 상세 내용을 조회합니다.")
