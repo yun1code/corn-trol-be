@@ -1,5 +1,8 @@
 package com.corntrol.corntrol.domain.record.service;
 
+import com.corntrol.corntrol.domain.connection.entity.RecordLink;
+import com.corntrol.corntrol.domain.connection.repository.RecordLinkRepository;
+import com.corntrol.corntrol.domain.record.dto.MindMapResponse;
 import com.corntrol.corntrol.domain.record.dto.RecordDto;
 import com.corntrol.corntrol.domain.record.entity.Record;
 import com.corntrol.corntrol.domain.record.entity.RecordType;
@@ -13,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -20,6 +25,7 @@ public class RecordService {
 
     private final RecordRepository recordRepository;
     private final UserRepository userRepository;
+    private final RecordLinkRepository recordLinkRepository;
 
     @Transactional
     public Long createRecord(RecordDto.CreateRequest request) {
@@ -62,5 +68,30 @@ public class RecordService {
     public Page<RecordDto.Response> searchRecords(Long userId, String keyword, Pageable pageable) {
         return recordRepository.searchRecords(userId, keyword, pageable)
                 .map(RecordDto.Response::from);
+    }
+
+    public MindMapResponse getMindMap(Long userId) {
+        List<Record> records = recordRepository.findByUser_Id(userId);
+        List<RecordLink> links = recordLinkRepository.findByUserId(userId);
+
+        List<MindMapResponse.Node> nodes = records.stream()
+                .map(record -> MindMapResponse.Node.builder()
+                        .recordId(record.getId())
+                        .keyword(record.getMainTopic())
+                        .build())
+                .toList();
+
+        List<MindMapResponse.Link> linkDtos = links.stream()
+                .map(link -> MindMapResponse.Link.builder()
+                        .sourceId(link.getSourceRecordId())
+                        .targetId(link.getTargetRecordId())
+                        .topic(link.getTopic())
+                        .build())
+                .toList();
+
+        return MindMapResponse.builder()
+                .nodes(nodes)
+                .links(linkDtos)
+                .build();
     }
 }

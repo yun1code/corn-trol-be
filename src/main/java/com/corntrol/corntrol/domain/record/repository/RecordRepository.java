@@ -25,4 +25,6 @@ public interface RecordRepository extends JpaRepository<Record, Long> {
 
     // 유저 ID로 관련된 모든 기록 삭제
     void deleteAllByUserId(Long userId);
+
+    List<Record> findByUser_Id(Long userId);
 }

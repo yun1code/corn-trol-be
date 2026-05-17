@@ -1,5 +1,6 @@
 package com.corntrol.corntrol.domain.record.controller;
 
+import com.corntrol.corntrol.domain.record.dto.MindMapResponse;
 import com.corntrol.corntrol.domain.record.dto.RecordDto;
 import com.corntrol.corntrol.domain.record.service.RecordService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -61,5 +62,11 @@ public class RecordController {
             @RequestParam("keyword") String keyword,
             Pageable pageable) {
         return ResponseEntity.ok(recordService.searchRecords(userId, keyword, pageable));
+    }
+
+    @Operation(summary = "마인드맵 전체 조회", description = "알곡 꿰기 화면을 위한 노드 및 링크 데이터 반환")
+    @GetMapping("/mindmap")
+    public ResponseEntity<MindMapResponse> getMindMap(@RequestParam("userId") Long userId) {
+        return ResponseEntity.ok(recordService.getMindMap(userId));
     }
 }

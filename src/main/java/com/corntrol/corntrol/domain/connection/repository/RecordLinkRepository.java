@@ -23,4 +23,6 @@ public interface RecordLinkRepository extends JpaRepository<RecordLink, Long> {
 
     // 유저 아이디로 연결 노드 총 개수 세기
     Long countByUserId(Long userId);
+
+    List<RecordLink> findByUserId(Long userId);
 }
