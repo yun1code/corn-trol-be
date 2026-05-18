@@ -29,7 +29,13 @@ public class WhisperService {
 
         String contentType = audioFile.getContentType();
         if (contentType != null) {
-            headers.setContentType(MediaType.valueOf(contentType));
+            if (contentType.contains("m4a") || contentType.contains("x-m4a")) {
+                headers.setContentType(MediaType.valueOf("audio/mp4"));
+            } else {
+                headers.setContentType(MediaType.valueOf(contentType));
+            }
+        } else {
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         }
 
         try {
@@ -47,7 +53,6 @@ public class WhisperService {
             } else {
                 throw new RuntimeException("음성 인식에 실패했습니다.");
             }
-
         } catch (Exception e) {
             throw new RuntimeException("음성 인식 서비스와 통신할 수 없습니다.", e);
         }
