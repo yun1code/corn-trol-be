@@ -41,4 +41,9 @@ public class Record {
     public void updateContent(String content) {
         this.content = content;
     }
+
+    public void updateAnalysisResults(String mainTopic, String keywords) {
+        this.mainTopic = mainTopic;
+        this.keywords = keywords;
+    }
 }

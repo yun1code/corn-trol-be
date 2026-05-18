@@ -54,6 +54,11 @@ public class AnalysisService {
                     .build();
 
             analysisRepository.save(analysis);
+
+            String keywordsString = responseDto.getKeywords() != null ?
+                    String.join(", ", responseDto.getKeywords()) : null;
+
+            record.updateAnalysisResults(responseDto.getTopic(), keywordsString);
         }
 
         return responseDto;
