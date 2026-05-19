@@ -37,7 +37,6 @@ public class ConnectionService {
                 .orElseThrow(() -> new IllegalArgumentException("분석 데이터가 없습니다. 먼저 분석을 진행해주세요. ID: " + request.getRecordId()));
 
         String targetTopic = sourceAnalysis.getTopic();
-
         List<RecordLink> existingLinks = recordLinkRepository.findByTopicAndIsConnectedTrue(targetTopic);
 
         Set<Long> candidateIds = existingLinks.stream()
@@ -51,6 +50,44 @@ public class ConnectionService {
                 .map(Optional::get)
                 .map(a -> new AiRecordInfo(a.getRecordId(), a.getTopic(), a.getKeywords(), a.getEmbedding()))
                 .toList();
+
+        // 🚀 [추가된 핵심 로직] 기존 연결 네트워크 후보가 없는 경우 (초기 기록 자동 연결)
+        if (candidateRecords.isEmpty()) {
+            // 같은 토픽을 가진 다른 기록들을 찾아옴
+            List<Analysis> sameTopicRecords = analysisRepository.findByTopicAndRecordIdNot(targetTopic, sourceAnalysis.getRecordId());
+
+            for (Analysis target : sameTopicRecords) {
+                Long targetId = target.getRecordId();
+                Long sourceId = sourceAnalysis.getRecordId();
+
+                // 1. 소스나 타겟이 이미 다른 네트워크에 속해있는지 검증
+                boolean isSourceLinked = recordLinkRepository.existsBySourceRecordIdOrTargetRecordIdAndIsConnectedTrue(sourceId, sourceId);
+                boolean isTargetLinked = recordLinkRepository.existsBySourceRecordIdOrTargetRecordIdAndIsConnectedTrue(targetId, targetId);
+
+                // 2. 이 두 기록 간에 이미 연결된 적 있는지 검증
+                boolean isPairAlreadyLinked = recordLinkRepository.existsConnectedLinkBetween(sourceId, targetId);
+
+                // 3. 완전히 깨끗한 상태라면 AI를 거치지 않고 냅다 연결!
+                if (!isSourceLinked && !isTargetLinked && !isPairAlreadyLinked) {
+                    RecordLink autoLink = RecordLink.builder()
+                            .userId(Long.valueOf(request.getUserId()))
+                            .sourceRecordId(sourceId)
+                            .targetRecordId(targetId)
+                            .topic(targetTopic)
+                            .similarityScore(1.0)
+                            .keywordScore(1.0)
+                            .finalScore(1.0)
+                            .isConnected(true) // 🔥 핵심: 추천 대기가 아니라 진짜로 바로 연결됨!
+                            .build();
+
+                    recordLinkRepository.save(autoLink);
+
+                    // 자동 연결되었으므로 여기서 바로 응답 반환하고 메서드 종료 (AI 서버 호출 안 함!)
+                    return new AiRecommendResponse(request.getUserId(), sourceId, targetId, targetTopic, 1f, 1f, 1f);
+                }
+            }
+        }
+        // 🚀 [여기까지 추가됨]
 
         AiRecordInfo sourceInfo = new AiRecordInfo(
                 sourceAnalysis.getRecordId(),
@@ -77,7 +114,7 @@ public class ConnectionService {
                     .similarityScore((double) response.getSimilarityScore())
                     .keywordScore((double) response.getKeywordScore())
                     .finalScore((double) response.getFinalScore())
-                    .isConnected(false)
+                    .isConnected(false) // AI 추천은 사용자가 수락해야 하므로 false 유지
                     .build();
 
             recordLinkRepository.save(newLink);
