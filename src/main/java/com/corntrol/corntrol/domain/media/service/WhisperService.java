@@ -29,11 +29,7 @@ public class WhisperService {
 
         String contentType = audioFile.getContentType();
         if (contentType != null) {
-            if (contentType.contains("m4a") || contentType.contains("x-m4a")) {
-                headers.setContentType(MediaType.valueOf("audio/mp4"));
-            } else {
-                headers.setContentType(MediaType.valueOf(contentType));
-            }
+            headers.setContentType(MediaType.valueOf(contentType));
         } else {
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         }
