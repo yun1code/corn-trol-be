@@ -1,6 +1,7 @@
 package com.corntrol.corntrol.domain.media.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Collections;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class WhisperService {
@@ -23,6 +25,12 @@ public class WhisperService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     public String transcribeAudio(MultipartFile audioFile) {
+
+        log.info("--- [DEBUG] WhisperService Start ---");
+        log.info("File Original Name: {}", audioFile.getOriginalFilename());
+        log.info("File Content-Type: {}", audioFile.getContentType());
+        log.info("File Size: {} bytes", audioFile.getSize());
+
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(apiKey);
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
@@ -33,6 +41,9 @@ public class WhisperService {
         } else {
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         }
+
+        log.info("--- [DEBUG] Sending Request ---");
+        log.info("Final Content-Type to HuggingFace: {}", headers.getContentType());
 
         try {
             HttpEntity<byte[]> requestEntity = new HttpEntity<>(audioFile.getBytes(), headers);
