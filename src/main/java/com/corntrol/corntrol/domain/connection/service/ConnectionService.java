@@ -101,7 +101,6 @@ public class ConnectionService {
                             .build();
 
                     recordLinkRepository.save(autoLink);
-                    // 💡 여기서 userId.intValue() 로 변환해서 넣도록 수정됨!
                     return new AiRecommendResponse(userId.intValue(), sourceId, targetId, targetTopic, 1f, 1f, 1f);
                 }
             }
@@ -114,7 +113,6 @@ public class ConnectionService {
                 sourceAnalysis.getEmbedding()
         );
 
-        // 💡 여기서도 userId.intValue() 로 변환해서 넣도록 수정됨!
         AiRecommendRequest aiRequest = new AiRecommendRequest(userId.intValue(), sourceInfo, candidateRecords);
 
         AiRecommendResponse response = restClient.post()

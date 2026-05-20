@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ] # main 브랜치에 코드가 올라가면 실행
+    branches: [ "main" ]
 
 jobs:
   build-and-deploy:
@@ -22,6 +22,7 @@ jobs:
 
       # 3. Gradle 빌드 권한 부여 및 빌드 (빌드 시 필요한 메일 환경변수 주입)
       - name: Build with Gradle
+        working-directory: ./Corn-trol_Backend
         run: |
           chmod +x gradlew
           ./gradlew clean build -x test
@@ -38,6 +39,7 @@ jobs:
 
       # 5. 도커 이미지 빌드 및 푸시
       - name: Build and push Docker image
+        working-directory: ./Corn-trol_Backend
         run: |
           docker build -t ${{ secrets.DOCKER_USERNAME }}/corntrol:latest .
           docker push ${{ secrets.DOCKER_USERNAME }}/corntrol:latest
