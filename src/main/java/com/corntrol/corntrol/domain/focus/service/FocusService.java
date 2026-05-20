@@ -31,7 +31,7 @@ public class FocusService {
         Record current = recordRepository.findById(recordId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 기록을 찾을 수 없습니다."));
 
-        List<Record> connectedRecords = recordRepository.findAllConnectedRecords(recordId);
+        List<Record> connectedRecords = recordRepository.findAllConnectedRecords(recordId, userId);
 
         AiApiDto.Request request = AiApiDto.Request.builder()
                 .userId(userId)
